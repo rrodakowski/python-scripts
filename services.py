@@ -19,6 +19,13 @@ class FileService:
         file.write("\n")
         file.close()
 
+    def write_raw_text_to_file(self,filename, text):
+        logger.info("Writing the file: "+filename)
+        file = open(filename, "w")
+        for line in text:
+            file.write(line)
+        file.close()
+
     def read_a_file(self, filename):
         logger.info("Reading the file: "+filename)
         file = open(filename, 'r')

@@ -1,14 +1,13 @@
 __author__ = 'Randall'
 
-import pytumblr
-
 import argparse
 import os
 import time
 import logging
-
 from subprocess import call
-from services import FileService
+
+import pytumblr
+from snapya.services import FileService
 
 logger = logging.getLogger(__name__)
 

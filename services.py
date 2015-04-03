@@ -8,11 +8,19 @@ from socket import socket
 
 logger = logging.getLogger(__name__)
 
-class FileService:
+
+class FileService(object):
     'Contains helpful functions related to working with files'
 
     def __init__(self):
         logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(module)s %(message)s')
+
+    def ensure_dir(self, directory):
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+    def get_basename(self, path):
+        return os.path.basename(path)
 
     def get_first_and_last_column(filename, separator):
         with file(filename, 'rb') as file_obj:
@@ -22,7 +30,7 @@ class FileService:
                 if line: # Make sure there's at least one entry.
                     yield line[0], line[-1]
 
-    #useful for building novus load files
+    # useful for building novus load files
     def jar_files_in_dir(self, directory):
         for f in os.listdir(directory):
             if f.endswith(".gz"):
@@ -30,7 +38,7 @@ class FileService:
                 new_filename=no_ext+".jar"
                 call('jar cvfM {} {}'.format(new_filename, f), shell=True)
 
-    def write_to_file(self,filename, text):
+    def write_to_file(self, filename, text):
         logger.info("Writing the file: "+filename)
         file = open(filename, "w")
         for line in text:
@@ -38,7 +46,7 @@ class FileService:
         file.write("\n")
         file.close()
 
-    def write_raw_text_to_file(self,filename, text):
+    def write_raw_text_to_file(self, filename, text):
         logger.info("Writing the file: "+filename)
         file = open(filename, "w")
         for line in text:
@@ -65,7 +73,7 @@ class FileService:
     def send_message(self, msg_subject, msg_body, server_info, email_address):
         logger.info("Send email message to: "+email_address)
         subject = 'subject: {} {} {}'.format(time.asctime(), msg_subject.upper(), server_info)
-        email=self.create_email_file(subject, msg_body)
+        email = self.create_email_file(subject, msg_body)
         call('sendmail -v {} < {}'.format(email_address, email), shell=True)
 
 
@@ -113,6 +121,7 @@ class ServiceMonitor(object):
         subject = '%s: %s %s error' % (time.asctime(), test_type.upper(), server_info)
         message = 'There was an error while executing a %s test against %s.' % (test_type.upper(), server_info)
         os.system('echo "%s" | mail -s "%s" %s' % (message, subject, email_address))
+
 
 class ScreenScraper(object):
 

@@ -1,17 +1,23 @@
 #! /usr/bin/env python
 
-from html.parser import HTMLParser
-from urllib.request import urlopen
-from urllib import parse
 import traceback
 import re
 import argparse
+import string
+import time
+import urlparse
+
+from html.parser import HTMLParser
+from urllib.request import urlopen
+from urllib import parse
+
+from sys import argv
 
 from os import system
-from urllib2 import urlopen
-from socket import socket
 from sys import argv
 from time import asctime
+from urllib2 import urlopen
+from socket import socket
 
 
 class ServiceMonitor(object):
@@ -22,7 +28,6 @@ class ServiceMonitor(object):
         print('\tserver-info  \thostname:port for tcp')
         print('\t             \thttp://hostname/page for http')
         print('\temail-address\tusername or username@domain.com\n')
-
 
     def tcp_test(self, server_info):
         cpos = server_info.find(':')
@@ -38,7 +43,6 @@ class ServiceMonitor(object):
         except:
             return False
 
-
     def http_test(self, server_info):
         try:
             data = urlopen(server_info).read()
@@ -46,7 +50,6 @@ class ServiceMonitor(object):
         except:
             print('Could not read from the server')
             return False
-
 
     def server_test(self, test_type, server_info):
         if test_type.lower() == 'tcp':
@@ -57,7 +60,6 @@ class ServiceMonitor(object):
             print('Invalid test-type given, please use either tcp or http.')
             return True
 
-
     def send_error(self, test_type, server_info, email_address):
         subject = '%s: %s %s error' % (asctime(), test_type.upper(), server_info)
         message = 'There was an error while executing a %s test against %s.' % (test_type.upper(), server_info)
@@ -66,6 +68,22 @@ class ServiceMonitor(object):
     def main(self, test_type, server_info, email_address):
         if not self.server_test(argv[1], argv[2]):
             self.send_error(argv[1], argv[2], argv[3])
+
+
+class ScreenScraper(object):
+
+    def get_temperature(self, country, state, city):
+        url = urlparse.urljoin('http://www.weather.com/weather/cities/',
+                           string.lower(country)+'_' + \
+                           string.lower(state) + '_' + \
+                           string.replace(string.lower(city), ' ',
+                                          '_') + '.html')
+        data = urlopen(url).read()
+        start = string.index(data, 'current temp: ') + len('current temp: ')
+        stop = string.index(data, '&degv;F', start-1)
+        temp = int(data[start:stop])
+        localtime = time.asctime(time.localtime(time.time()))
+        print('On {}, the temperature in {}, {}, {} is {}.'.format(localtime,city, state, country, temp))
 
 
 # We are going to create a class called LinkParser that inherits some

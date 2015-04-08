@@ -7,11 +7,8 @@ import string
 import time
 import urlparse
 
-from html.parser import HTMLParser
-from urllib.request import urlopen
-from urllib import parse
-
-from sys import argv
+# changed to Html.Parser in python3
+from HTMLParser import HTMLParser
 
 from os import system
 from sys import argv
@@ -103,7 +100,7 @@ class LinkParser(HTMLParser):
                     # We combine a relative URL with the base URL to create
                     # an absolute URL like:
                     # www.netinstructions.com/somepage.html
-                    newUrl = parse.urljoin(self.baseUrl, value)
+                    newUrl = urlparse.urljoin(self.baseUrl, value)
                     # And add it to our collection of links:
                     self.links = self.links + [newUrl]
 

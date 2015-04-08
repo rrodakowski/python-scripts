@@ -6,19 +6,23 @@ import os
 import time
 import logging
 from subprocess import call
-from PIL import Image
 import glob
 
-import pytumblr
+#import pytumblr
+from PIL import Image
 from services import FileService
 
 logger = logging.getLogger(__name__)
 
 class ImageService(object):
 
+    def __init__(self):
+        logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(module)s %(message)s')
+
     def get_file_stats(self, filename):
-        print "Starting to output stats"
-        print "Done with stats"
+        im = Image.open(filename)
+        width, height = im.size
+        logger.info('Image size is: {}x{}'.format(width, height))
 
     def show_image(self, filename):
         im = Image.open(filename)
@@ -28,17 +32,13 @@ class ImageService(object):
         file, ext = os.path.splitext(filename)
         im = Image.open(filename)
         im.thumbnail(size, Image.ANTIALIAS)
-        im.save(file + ".thumbnail", "JPEG")
+        im.save(file + "-thumbnail.jpg", "JPEG")
 
-    def main(self, filename):
-        args = parser.parse_args()
-        print args
+    def make_thumbnails(self, dirname):
         size = 128, 128
-        filename='/home/randall/Pictures/profile.jpg'
-
-        #for infile in glob.glob("*.jpg"):
-        #get_file_stats(filename)
-        #resize_file(filename, size)
+        for infile in glob.glob(dirname+os.sep+"*.jpg"):
+            logger.info("Resizing file " + infile)
+            self.resize_file(infile, size)
 
 
 class AnimatedGifMaker(object):

@@ -7,7 +7,8 @@ Create a python package (I use one called services) in your python project and i
 
 ### Requirements
 
-The images module requires pillow. You can install by: 
+Tested with python2.7. 
+The images module requires the project pytumblr pillow. You can find pytumblr on github and can install pillow with: 
 
 pip install Pillow
 

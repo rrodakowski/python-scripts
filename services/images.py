@@ -8,7 +8,7 @@ import logging
 from subprocess import call
 import glob
 
-#import pytumblr
+import pytumblr
 from PIL import Image
 from services import FileService
 

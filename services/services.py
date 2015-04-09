@@ -59,8 +59,10 @@ class FileService(object):
 
     def create_email_file(self, filename, msg_subject, msg_body):
         logger.info("Creating an email file ")
+        # subject format: time subject from_server_info
+        subject = 'subject: {} {} {}'.format(time.asctime(), msg_subject.upper(), "orangeshovel")
         text=[]
-        text.append(msg_subject)
+        text.append(subject)
         for line in msg_body:
             text.append(line)
         self.write_to_file(filename,text)

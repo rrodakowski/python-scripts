@@ -57,19 +57,14 @@ class FileService(object):
         for line in file:
             logger.debug(line)
 
-    def create_email_file(self, msg_subject, msg_body):
+    def create_email_file(self, filename, msg_subject, msg_body):
         logger.info("Creating an email file ")
-        logtime=time.strftime("%Y%m%d")
-        filename='/app-data/link_reporting_{}.log'.format(logtime)
         text=[]
         text.append(msg_subject)
         for line in msg_body:
             text.append(line)
-        self.write_to_file(filename,text) 
-        return filename
+        self.write_to_file(filename,text)
 
-    def send_message(self, msg_subject, msg_body, server_info, email_address):
-        logger.info("Send email message to: "+email_address)
-        subject = 'subject: {} {} {}'.format(time.asctime(), msg_subject.upper(), server_info)
-        email = self.create_email_file(subject, msg_body)
-        call('sendmail -v {} < {}'.format(email_address, email), shell=True)
+    def send_email_file(self, emailfile, to_email_address):
+        logger.info("Send email message to: "+to_email_address)
+        call('sendmail -v {} < {}'.format(to_email_address, emailfile), shell=True)

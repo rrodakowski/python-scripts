@@ -10,9 +10,10 @@ import glob
 
 import pytumblr
 from PIL import Image
-from services import FileService
+from filelib import FileService
 
 logger = logging.getLogger(__name__)
+
 
 class ImageService(object):
 
@@ -42,11 +43,11 @@ class ImageService(object):
 
 
 class AnimatedGifMaker(object):
-    'This class creates an animated gif from files in a directory.'
+    """This class creates an animated gif from files in a directory."""
 
     def __init__(self):
         logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(module)s %(message)s')
-          # Authenticate via OAuth
+        # Authenticate via OAuth
         self.client = pytumblr.TumblrRestClient(
             '9ZpAAcfZ8YDzc0Evqcvhc4LldUPOl305X3v3A8U61GVFrf6V1q',
             'tcKzpTWCnnmMHM5AbY82nSHCR2Yl8qGEGtwVdXk3rovREhHJMS',
@@ -60,13 +61,13 @@ class AnimatedGifMaker(object):
         logger.info("Posting picture: " +filename)
 
         # Make an info request
-        #response = self.client.info()
+        # response = self.client.info()
 
-        #Posts an image to your tumblr.
-        #Make sure you point an image in your hard drive. Here, 'image.jpg' must be in the
-        #same folder where your script is saved.
-        #From yourBlogName.tumblr.com should just use 'yourBlogName'
-        #The default state is set to "queue", to publish use "published"
+        # Posts an image to your tumblr.
+        # Make sure you point an image in your hard drive. Here, 'image.jpg' must be in the
+        # same folder where your script is saved.
+        # From yourBlogName.tumblr.com should just use 'yourBlogName'
+        # The default state is set to "queue", to publish use "published"
         response = self.client.create_photo('snap-ya', state="published", tags=["testing", "ok"], data=filename)
         logger.info("Done Posting file.")
 
@@ -93,7 +94,7 @@ class AnimatedGifMaker(object):
                 call('convert {} -resize 500x375 {}.gif'.format(input_dir+os.sep+f, input_dir+os.sep+self.fs.get_basename(f)), shell=True)
 
         inputfiles=input_dir+os.sep+'*.gif'
-        #convert -delay 20 -loop 0 sphere*.gif animatespheres.gif
+        # convert -delay 20 -loop 0 sphere*.gif animatespheres.gif
         call('convert -delay 20 -loop 0 {} {}'.format(inputfiles, outputfilename), shell=True)
         logger.info("Finished creating animated gif. ")
 
@@ -101,14 +102,14 @@ class AnimatedGifMaker(object):
         logger.info("Cleaning up and moving files to the archive dir: "+archive_dir)
         final_dir=archive_dir+os.sep+self.timestamp
         for f in os.listdir(input_dir):
-            #if f.endswith("gif"): can put this back in, if I want to only cleanup gif files
+            # if f.endswith("gif"): can put this back in, if I want to only cleanup gif files
             os.rename(input_dir+os.sep+f, final_dir+os.sep+f)
 
     def main(self, input_dir, archive_dir, doUpload):
         outputfilename = self.preprocess(input_dir, archive_dir)
 
         self.processImage(input_dir, outputfilename)
-        if(doUpload):
+        if doUpload:
             self.post_picture(outputfilename)
         self.cleanup(input_dir, archive_dir)
 

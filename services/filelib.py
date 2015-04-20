@@ -5,6 +5,7 @@ import logging
 from subprocess import call
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.mime.image import MIMEImage
 
 
 logger = logging.getLogger(__name__)
@@ -86,24 +87,36 @@ class EmailService(object):
             text.append(line)
         self.fs.write_to_file(filename, text)
 
-    def build_html_email(self, from_email, to_email, subject, text, html, output_email_file):
+    def build_html_email(self, from_email, to_email, subject, text, html, images, output_email_file):
         logger.info("Creating an html email file. ")
         # Create message container - the correct MIME type is multipart/alternative.
-        msg = MIMEMultipart('alternative')
-        msg['Subject'] = subject
-        msg['From'] = from_email
-        msg['To'] = to_email
+        msg_root = MIMEMultipart('alternative')
+        msg_root['Subject'] = subject
+        msg_root['From'] = from_email
+        msg_root['To'] = to_email
 
         # Record the MIME types of both parts - text/plain and text/html.
-        part1 = MIMEText(text, 'plain')
-        part2 = MIMEText(html, 'html')
+        plain_text = MIMEText(text, 'plain')
+        html_text = MIMEText(html, 'html')
 
         # Attach parts into message container.
         # According to RFC 2046, the last part of a multipart message, in this case
         # the HTML message, is best and preferred.
-        msg.attach(part1)
-        msg.attach(part2)
-        self.fs.write_raw_text_to_file(output_email_file, msg.as_string())
+        msg_root.attach(plain_text)
+        msg_root.attach(html_text)
+
+        for image_id in images:
+            # This example assumes the image is in the current directory
+            image_path = images[image_id]
+            fp = open(image_path, 'rb')
+            msg_image = MIMEImage(fp.read())
+            fp.close()
+
+            # Define the image's ID as referenced above
+            msg_image.add_header('Content-ID', '<{}>'.format(image_id))
+            msg_root.attach(msg_image)
+
+        self.fs.write_raw_text_to_file(output_email_file, msg_root.as_string())
 
     @staticmethod
     def send_email_file(email_file, to_email_address):

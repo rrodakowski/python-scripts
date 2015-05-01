@@ -15,7 +15,7 @@ class FileService(object):
     """Contains helpful functions related to working with files"""
 
     def __init__(self):
-        logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(module)s %(message)s')
+        logger.debug("Creating the FileService")
 
     @staticmethod
     def ensure_dir(directory):

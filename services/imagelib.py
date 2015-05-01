@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class ImageService(object):
 
     def __init__(self):
-        logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(module)s %(message)s')
+        logger.debug("Creating the ImageService")
 
     def get_file_stats(self, filename):
         im = Image.open(filename)

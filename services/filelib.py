@@ -2,6 +2,7 @@ import csv
 import os
 import time
 import logging
+import traceback
 from subprocess import call
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -98,19 +99,26 @@ class EmailService(object):
         # Record the MIME types of both parts - text/plain and text/html.
         plain_text = MIMEText(text, 'plain')
         html_text = MIMEText(html, 'html')
+        logger.info("Added headers. ")
 
         # Attach parts into message container.
         # According to RFC 2046, the last part of a multipart message, in this case
         # the HTML message, is best and preferred.
         msg_root.attach(plain_text)
         msg_root.attach(html_text)
+        logger.info("Added body. ")
 
         for image_id in images:
+            logger.info("Added image: {} ".format(image_id))
             # This example assumes the image is in the current directory
             image_path = images[image_id]
-            fp = open(image_path, 'rb')
-            msg_image = MIMEImage(fp.read())
-            fp.close()
+            try:
+                fp = open(image_path, 'rb')
+                msg_image = MIMEImage(fp.read())
+                fp.close()
+            except:
+                logger.error("Could not attach image file {}".format(image_path))
+                logger.error(traceback.format_exc())
 
             # Define the image's ID as referenced above
             msg_image.add_header('Content-ID', '<{}>'.format(image_id))

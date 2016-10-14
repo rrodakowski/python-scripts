@@ -5,6 +5,7 @@ then
     echo "$file found."
     . $file
 
+    # Password will have to be passed into this script 
     DEST_USER_PW=$1
 
     #Build Server Work
@@ -20,7 +21,6 @@ then
     echo "Removing the tar file"
     rm $HOME/$TAR_FILE
 
-    # Password will have to be set as environment variable
     ssh $DEST_USER@$DEST_HOST 'echo '"${DEST_USER_PW}"' | sudo -Sv && DIR="'$DEST_DIR'" TAR="'$TAR_FILE'" bash -s' < remote_work.sh
 else
     echo "$file not found."

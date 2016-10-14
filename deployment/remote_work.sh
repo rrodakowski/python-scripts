@@ -1,4 +1,7 @@
-
+# properties 
+# don't have the deply.properties on remote server so use
+# properties here, passed into this script are:
+# $TAR and $DIR
 DEPLOYDIR=/app-bin
 
 echo "Deploying $TAR to $DEPLOYDIR"
@@ -10,5 +13,5 @@ rm $TAR
 
 sudo service apache2 restart
 
-echo "build successfully finished"
+echo "deploy successfully finished"
 

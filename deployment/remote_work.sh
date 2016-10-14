@@ -10,3 +10,5 @@ rm $TAR
 
 sudo service apache2 restart
 
+echo "build successfully finished"
+

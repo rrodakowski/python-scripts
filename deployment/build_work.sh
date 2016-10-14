@@ -5,6 +5,8 @@ then
     echo "$file found."
     . $file
 
+    DEST_USER_PW=$1
+
     #Build Server Work
     echo "Jenkins HOME: $JENKINS_HOME"
     echo "Worskpace: "${WORKSPACE}

@@ -8,6 +8,9 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 
+import xml.etree.cElementTree as ET
+from xml.dom import minidom # used for pretty printing
+
 
 logger = logging.getLogger(__name__)
 
@@ -68,6 +71,40 @@ class FileService(object):
         file = open(filename, 'r')
         for line in file:
             logger.debug(line)
+
+
+class XmlService(object):
+
+    def __init__(self):
+        logger.debug("Creating the XmlService")
+
+    def prettify(self, elem):
+        """Return a pretty-printed XML string for the Element.
+        """
+        rough_string = ET.tostring(elem, 'utf-8')
+        reparsed = minidom.parseString('<root>'+rough_string+'</root>')
+        return reparsed.toprettyxml(indent="\t")
+
+    def find_in_tree(self, tree, node):
+        found = tree.find(node)
+        if found == None:
+            print "No %s in file" % node
+            found = []
+        return found
+
+    def write_out_to_xml(self, root, output_file):
+        #root = ET.Element("root")
+        fs = FileService()
+        fs.write_raw_text_to_file(output_file, root)
+
+    def evaluate_xpath(self, root, xpath):
+        return root.findall(xpath)
+
+    def get_text(self, root):
+        for page in list(root):
+            title = page.find('title').text
+            content = page.find('content').text
+            print('title: %s; content: %s' % (title, content))
 
 
 class EmailService(object):

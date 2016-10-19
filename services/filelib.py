@@ -129,13 +129,13 @@ class EmailService(object):
         logger.info("Creating an html email file. ")
         # Create message container - the correct MIME type is multipart/alternative.
         msg_root = MIMEMultipart('alternative')
-        msg_root['Subject'] = subject
-        msg_root['From'] = from_email
-        msg_root['To'] = to_email
+        msg_root['Subject'] = subject.encode('utf-8')
+        msg_root['From'] = from_email.encode('utf-8')
+        msg_root['To'] = to_email.encode('utf-8')
 
         # Record the MIME types of both parts - text/plain and text/html.
-        plain_text = MIMEText(text, 'plain')
-        html_text = MIMEText(html, 'html')
+        plain_text = MIMEText(text.encode('utf-8'), 'plain')
+        html_text = MIMEText(html.encode('utf-8'), 'html')
         logger.info("Added headers. ")
 
         # Attach parts into message container.

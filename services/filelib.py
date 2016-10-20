@@ -27,10 +27,6 @@ class FileService(object):
             os.makedirs(directory)
 
     @staticmethod
-    def get_basename(path):
-        return os.path.basename(path)
-
-    @staticmethod
     def get_first_and_last_column(filename, separator):
         with file(filename, 'rb') as file_obj:
             for line in csv.reader(file_obj,

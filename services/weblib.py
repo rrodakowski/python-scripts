@@ -1,5 +1,4 @@
 #! /usr/bin/env python
-
 import traceback
 import re
 import argparse
@@ -184,4 +183,3 @@ if __name__ == '__main__':
 #        sm.usage()
 
 #   sm.main(argv[1], argv[2], argv[3])
-

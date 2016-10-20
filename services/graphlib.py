@@ -1,7 +1,7 @@
 import os
-import pygal
-
 import logging
+
+import pygal
 
 logger = logging.getLogger(__name__)
 

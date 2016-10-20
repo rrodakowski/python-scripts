@@ -9,6 +9,10 @@ Copy the lib modules into your python project and import classes from the requir
 
 Tested with python3.5.
 
-The imagelib module uses ImageMagick to perform all image processing.
+The imagelib module uses ImageMagick to perform all image processing
+and has an S3 file manager that requires:
 
-The graphlib module uses pygal:pip install pygal
+pip install boto3
+pip install awscli
+
+The graphlib module uses pygal: pip install pygal

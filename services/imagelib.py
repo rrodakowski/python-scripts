@@ -6,10 +6,17 @@ import logging
 from subprocess import call
 from subprocess import check_output
 
+# For the S3File Manager
+# pip install boto3
+# pip install awscli
+import boto3
+from botocore.client import ClientError
+
 logger = logging.getLogger(__name__)
 
 
 class ImageService(object):
+    """A wrapper for working with Imagemagick directly from python"""
 
     def __init__(self):
         logger.debug("Creating the ImageService")
@@ -50,3 +57,67 @@ class ImageService(object):
         # convert -delay 20 -loop 0 sphere*.gif animatespheres.gif
         call('convert -delay 20 -loop 0 {} {}'.format(inputfiles, outputfilename), shell=True)
         logger.info("Finished creating animated gif. ")
+
+
+class S3FileManager:
+    """A wrapper for working with S3/AWS"""
+    def __init__(self):
+        # Let's use Amazon S3
+        self.s3 = boto3.resource('s3')
+
+    def print_bucket_names(self):
+        # Print out bucket names
+        for bucket in self.s3.buckets.all():
+            print(bucket.name)
+
+    def create_bucket(self, aws_bucketname):
+        self.s3.create_bucket(Bucket=aws_bucketname)
+
+    def delete_bucket(self, aws_bucketname):
+        if self._bucket_exists(aws_bucketname):
+            bucket = self.s3.Bucket(aws_bucketname)
+            for key in bucket.objects.all():
+                key.delete()
+            bucket.delete()
+
+    def upload_file(self, aws_bucketname, filepath):
+        # Upload a new file
+        if self._bucket_exists(aws_bucketname):
+            filename = os.path.basename(filepath)
+            with open(filepath, 'rb') as data:
+                self.s3.Bucket(aws_bucketname).Object(filename).put(Body=data)
+
+    def download_file(self, aws_bucketname, s3_file, local_download_directory):
+        """
+        Download a file from the S3 output bucket to your hard drive.
+        """
+        destination_path = os.path.join(
+            local_download_directory,
+            os.path.basename(s3_file)
+        )
+        body = self.s3.Bucket(aws_bucketname).Object(s3_file).get()['Body']
+        with open(destination_path, 'wb') as dest:
+            # Here we write the file in chunks to prevent
+            # loading everything into memory at once.
+            for chunk in iter(lambda: body.read(4096), b''):
+                dest.write(chunk)
+
+    def delete_files_from_bucket(self, aws_bucketname):
+        if self._bucket_exists(aws_bucketname):
+            # S3 delete everything in `my-bucket`
+            self.s3.Bucket(aws_bucketname).objects.delete()
+
+    def _bucket_exists(self, bucket_name):
+        """
+        Returns ``True`` if a bucket exists and you have access to
+        call ``HeadBucket`` on it, otherwise ``False``.
+        """
+        try:
+            self.s3.meta.client.head_bucket(Bucket=bucket_name)
+            return True
+        except ClientError:
+            print ("error bucket does not exist")
+            return False
+
+    def _printBucketNotFoundMessage(self, bucket_name):
+        print("Error: bucket '{}' not found".format(bucket_name))

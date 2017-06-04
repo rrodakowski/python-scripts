@@ -7,12 +7,27 @@ from subprocess import call
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
-
-import xml.etree.cElementTree as ET
-from xml.dom import minidom # used for pretty printing
+from email import charset
 
 
 logger = logging.getLogger(__name__)
+
+
+def remove_files(files_to_delete):
+    for f in files_to_delete:
+        os.remove(f)
+
+def ensure_dir(directory):
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+# useful for building novus load files
+def jar_files_in_dir(directory):
+    for f in os.listdir(directory):
+        if f.endswith(".gz"):
+            no_ext=f[:-3]
+            new_filename=no_ext+".jar"
+            call('jar cvfM {} {}'.format(new_filename, f), shell=True)
 
 
 class FileService(object):
@@ -22,11 +37,6 @@ class FileService(object):
         logger.debug("Creating the FileService")
 
     @staticmethod
-    def ensure_dir(directory):
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-
-    @staticmethod
     def get_first_and_last_column(filename, separator):
         with file(filename, 'rb') as file_obj:
             for line in csv.reader(file_obj,
@@ -34,15 +44,6 @@ class FileService(object):
                 skipinitialspace=True): # Strips whitespace after delimiter.
                 if line: # Make sure there's at least one entry.
                     yield line[0], line[-1]
-
-    # useful for building novus load files
-    @staticmethod
-    def jar_files_in_dir(directory):
-        for f in os.listdir(directory):
-            if f.endswith(".gz"):
-                no_ext=f[:-3]
-                new_filename=no_ext+".jar"
-                call('jar cvfM {} {}'.format(new_filename, f), shell=True)
 
     @staticmethod
     def write_to_file(filename, text):
@@ -69,40 +70,6 @@ class FileService(object):
             logger.debug(line)
 
 
-class XmlService(object):
-
-    def __init__(self):
-        logger.debug("Creating the XmlService")
-
-    def prettify(self, elem):
-        """Return a pretty-printed XML string for the Element.
-        """
-        rough_string = ET.tostring(elem, 'utf-8')
-        reparsed = minidom.parseString('<root>'+rough_string+'</root>')
-        return reparsed.toprettyxml(indent="\t")
-
-    def find_in_tree(self, tree, node):
-        found = tree.find(node)
-        if found == None:
-            print "No %s in file" % node
-            found = []
-        return found
-
-    def write_out_to_xml(self, root, output_file):
-        #root = ET.Element("root")
-        fs = FileService()
-        fs.write_raw_text_to_file(output_file, root)
-
-    def evaluate_xpath(self, root, xpath):
-        return root.findall(xpath)
-
-    def get_text(self, root):
-        for page in list(root):
-            title = page.find('title').text
-            content = page.find('content').text
-            print('title: %s; content: %s' % (title, content))
-
-
 class EmailService(object):
     """Contains helpful functions related to working with emails"""
 
@@ -123,15 +90,21 @@ class EmailService(object):
 
     def build_html_email(self, from_email, to_email, subject, text, html, images, output_email_file):
         logger.info("Creating an html email file. ")
+        # couldn't figure out how to get the email to display so that it wasn't base64 encoded
+        # this post on the interweb pointed out this line
+        # http://bugs.python.org/issue12552
+        charset.add_charset('utf-8', charset.SHORTEST, charset.QP)
+
         # Create message container - the correct MIME type is multipart/alternative.
         msg_root = MIMEMultipart('alternative')
-        msg_root['Subject'] = subject.encode('utf-8')
-        msg_root['From'] = from_email.encode('utf-8')
-        msg_root['To'] = to_email.encode('utf-8')
+        msg_root['Subject'] = subject
+        msg_root['From'] = from_email
+        msg_root['To'] = to_email
 
         # Record the MIME types of both parts - text/plain and text/html.
-        plain_text = MIMEText(text.encode('utf-8'), 'plain')
-        html_text = MIMEText(html.encode('utf-8'), 'html')
+        plain_text = MIMEText(text, 'plain')
+        html_text = MIMEText(html, 'html')
+
         logger.info("Added headers. ")
 
         # Attach parts into message container.
